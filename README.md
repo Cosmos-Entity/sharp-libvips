@@ -1,3 +1,30 @@
+# Cosmos patched Sharp native packages
+
+ENG-14549: this fork builds libheif 1.23.4 with libvips 8.18.6 for upstream Sharp 0.35.4.
+The Cosmos CI produces scoped `@cosmos-entity/sharp-libvips-<platform>@1.3.3-cosmos.1`
+packages. It never publishes to public npm and has no Nexus credentials.
+
+After CI succeeds, the trusted `cosmos-actions` vendor publisher verifies the build
+repository, run, and commit before publishing the exact tarballs to Nexus npm-hosted.
+Consumers read through `https://nexus.m.cos.ms/repository/npm-group/` and override
+`@img/sharp-libvips-<platform>` with the matching scoped Cosmos package. Test every
+native addon/platform pairing; upgrading a lockfile alone does not prove the loaded
+library changed. Deployments must verify their final artifacts.
+
+Production targets are glibc x64 (Lambda) and musl arm64 (cosmos-www). CI also builds
+musl x64 and macOS arm64. Other platforms are not yet covered by this remediation.
+All packages retain upstream notices and a BUILD-PROVENANCE.json with source/run IDs.
+The source for modified libraries remains available through the recorded versions;
+this repository contains the build recipes. Upstream's uncompressed codec and HEVC
+feature choices are preserved; adding HEVC decoding is a separate change (ENG-11148).
+
+Remove consumer overrides once upstream publishes and verifies equivalent fixes.
+Review libheif releases regularly; 1.23.4 is a security baseline, not a guarantee
+against future vulnerabilities. Build system packages still track distro updates;
+we do not claim bit-for-bit reproducibility.
+
+## Upstream documentation
+
 # Packaging scripts
 
 libvips and its dependencies are provided as pre-compiled shared libraries
