@@ -45,9 +45,9 @@ RUN \
     --no-modify-path \
     --profile minimal \
     --default-host aarch64-unknown-linux-musl \
-    --default-toolchain nightly \
+    --default-toolchain nightly-2026-09-01 \
     && \
-  cargo install cargo-c --locked && \
+  cargo install cargo-c --version 0.10.25 --locked && \
   pipx install meson
 
 # Compiler settings

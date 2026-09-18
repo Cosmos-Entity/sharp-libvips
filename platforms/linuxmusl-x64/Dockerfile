@@ -45,9 +45,9 @@ RUN \
   curl https://sh.rustup.rs -sSf | sh -s -- -y \
     --no-modify-path \
     --profile minimal \
-    --default-toolchain nightly \
+    --default-toolchain nightly-2026-09-01 \
     && \
-  cargo install cargo-c --locked && \
+  cargo install cargo-c --version 0.10.25 --locked && \
   pipx install meson
 
 # Compiler settings

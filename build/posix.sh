@@ -111,9 +111,9 @@ CURL="curl --silent --location --retry 3 --retry-max-time 30"
 
 if [ "$DARWIN" = true ]; then
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-    | sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly
+    | sh -s -- -y --no-modify-path --profile minimal --default-toolchain nightly-2026-09-01
   export RUSTFLAGS+=" -Zlocation-detail=none -Zfmt-debug=none"
-  CFLAGS= cargo install cargo-c --locked
+  CFLAGS= cargo install cargo-c --version 0.10.25 --locked
 fi
 
 if [ "${PLATFORM%-*}" == "linuxmusl" ] || [ "$DARWIN" = true ]; then
@@ -187,7 +187,13 @@ AOM_AS_FLAGS="${FLAGS}" cmake -G"Unix Makefiles" \
 make install/strip
 
 mkdir ${DEPS}/heif
-$CURL https://github.com/strukturag/libheif/releases/download/v${VERSION_HEIF}/libheif-${VERSION_HEIF}.tar.gz | tar xzC ${DEPS}/heif --strip-components=1
+$CURL https://github.com/strukturag/libheif/releases/download/v${VERSION_HEIF}/libheif-${VERSION_HEIF}.tar.gz > ${DEPS}/libheif.tar.gz
+if [ "$DARWIN" = true ]; then
+  echo "d0c02b4b0e978f34a1974b6f3eea7975a537bf7a9195ffeea38e7242ff316fdd  ${DEPS}/libheif.tar.gz" | shasum -a 256 -c -
+else
+  echo "d0c02b4b0e978f34a1974b6f3eea7975a537bf7a9195ffeea38e7242ff316fdd  ${DEPS}/libheif.tar.gz" | sha256sum -c -
+fi
+tar xzf ${DEPS}/libheif.tar.gz -C ${DEPS}/heif --strip-components=1
 cd ${DEPS}/heif
 CFLAGS="${CFLAGS} -O3" CXXFLAGS="${CXXFLAGS} -O3" cmake -G"Unix Makefiles" \
   -DCMAKE_TOOLCHAIN_FILE=${ROOT}/Toolchain.cmake -DCMAKE_INSTALL_PREFIX=${TARGET} -DCMAKE_INSTALL_LIBDIR=lib -DCMAKE_BUILD_TYPE=Release \
@@ -477,7 +483,7 @@ printf "{\n\
 }" >versions.json
 
 # Add third-party notices
-$CURL -O https://raw.githubusercontent.com/lovell/sharp-libvips/main/THIRD-PARTY-NOTICES.md
+cp "${PACKAGE}/THIRD-PARTY-NOTICES.md" .
 
 # Create the tarball
 ls -al lib
