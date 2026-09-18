@@ -16,10 +16,10 @@ cp scripts/smoke.cjs "$test_dir/smoke.cjs"
 printf '{"private":true,"dependencies":{"sharp":"0.35.4"},"overrides":{"@img/sharp-libvips-%s":"file:./native.tgz"}}\n' "$runtime_platform" > "$test_dir/package.json"
 case "$platform" in
   linux-x64)
-    docker run --rm --memory=1g --cpus=2 --pids-limit=256 --entrypoint /bin/bash -v "$test_dir:/var/task" -w /var/task public.ecr.aws/lambda/nodejs:24 -c 'npm install --ignore-scripts && node --max-old-space-size=256 smoke.cjs'
+    docker run --rm --user "$(id -u):$(id -g)" -e npm_config_cache=/tmp/npm-cache --memory=1g --cpus=2 --pids-limit=256 --entrypoint /bin/bash -v "$test_dir:/var/task" -w /var/task public.ecr.aws/lambda/nodejs:24 -c 'npm install --ignore-scripts && node --max-old-space-size=256 smoke.cjs'
     ;;
   linuxmusl-*)
-    docker run --rm --memory=1g --cpus=2 --pids-limit=256 -v "$test_dir:/app" -w /app node:24-alpine sh -c 'npm install --ignore-scripts && node --max-old-space-size=256 smoke.cjs'
+    docker run --rm --user "$(id -u):$(id -g)" -e npm_config_cache=/tmp/npm-cache --memory=1g --cpus=2 --pids-limit=256 -v "$test_dir:/app" -w /app node:24-alpine sh -c 'npm install --ignore-scripts && node --max-old-space-size=256 smoke.cjs'
     ;;
   darwin-arm64v8)
     (cd "$test_dir" && npm install --ignore-scripts && node smoke.cjs)
